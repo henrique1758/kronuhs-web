@@ -1,0 +1,29 @@
+.wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+
+    img {
+        width: 3.125rem;
+        height: 3.125rem;
+        border-radius: 50%;
+    }
+}
+
+.commentInfo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    strong {
+        color: var(--black-500);
+    }
+}
+
+.commentData {
+    display: grid;
+
+    p {
+        color: var(--gray-400);
+    }
+}

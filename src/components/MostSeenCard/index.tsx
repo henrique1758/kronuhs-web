@@ -1,47 +1,56 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
+import Link from "next/link";
 import { Clock, Eye, HandsClapping } from "phosphor-react";
 import { Badge } from "../Badge";
 
 interface MostSeenCard {
-  path?: string;
+  title: string;
+  description: string;
 }
 
 import styles from "./styles.module.scss";
 
-export function MostSeenCard({ path }: MostSeenCard) {
+export function MostSeenCard({ title, description }: MostSeenCard) {
   return (
-    <a href="/posts" className={styles.container}>
-      <img className={styles.banner} src="/bg.png" alt="bg" />
+    <Link href="/posts">
+      <a className={styles.container}>
+        <article className={styles.wrapper}>
+          <img src="/bg.png" alt="banner" className={styles.banner} />
 
-      <div className={styles.postContent}>
-        <Badge title="JS" />
+          <div className={styles.postData}>
+            <h2 title={title}>{title}</h2>
 
-        <h2>Arrow Functions</h2>
+            <div className={styles.infos}>
+              <div className={styles.info}>
+                88 <HandsClapping />
+              </div>
 
-        <div className={styles.analytics}>
-          <div className={styles.info}>
-            88 <HandsClapping />
+              <div className={styles.info}>
+                102 <Eye />
+              </div>
+
+              <div className={styles.info}>
+                4 min <Clock />
+              </div>
+            </div>
+
+            <p className={styles.shortDescription}>
+              {description}
+            </p>
+
+            <footer>
+              <div className={styles.authorContainer}>
+                <Image src="/man.jpg" width={33} height={33} alt="author" />
+
+                <span>Luiz</span>
+              </div>
+
+              <time>30 de maio, 2022</time>
+            </footer>
           </div>
-
-          <div className={styles.info}>
-            102 <Eye />
-          </div>
-
-          <div className={styles.info}>
-            4 min de leitura <Clock />
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.postInfos}>
-        <div className={styles.authorInfo}>
-          <Image src="/man.jpg" width={33} height={33} alt="man" />
-          <span>Luíz</span>
-        </div>
-
-        <span className={styles.publishedDate}>30 de maio, 2022</span>
-      </div>
-    </a>
+        </article>
+      </a>
+    </Link>
   );
 }

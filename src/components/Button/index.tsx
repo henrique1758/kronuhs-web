@@ -7,11 +7,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 import styles from "./styles.module.scss";
 
-export function Button({ title, bgColor }: ButtonProps) {
+export function Button({ title, bgColor, ...rest }: ButtonProps) {
   return (
-    <button className={`
-      ${styles.container} ${bgColor === 'black' ? styles.bgBlack : styles.bgGreen}
-    `}>
+    <button 
+      className={`
+        ${styles.container} ${bgColor === 'black' ? styles.bgBlack : styles.bgGreen}
+      `}
+
+      {...rest}
+    >
       {title}
     </button>
   );

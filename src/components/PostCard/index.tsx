@@ -5,7 +5,7 @@ import styles from "./styles.module.scss";
 export function PostCard() {
   return (
     <div className={styles.container}>
-      <a href="#">
+      <a href="/post">
         <img 
           src="/mac.png" 
           alt="macbook" 
