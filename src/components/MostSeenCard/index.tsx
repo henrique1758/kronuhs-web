@@ -2,16 +2,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, Eye, HandsClapping } from "phosphor-react";
+import ReactMarkdown from "react-markdown";
 import { Badge } from "../Badge";
 
 interface MostSeenCard {
   title: string;
-  description: string;
+  content: string;
+  likes: number;
+  views: number;
+  publishedAt: string;
+  author: {
+    firstName: string;
+  };
 }
 
 import styles from "./styles.module.scss";
 
-export function MostSeenCard({ title, description }: MostSeenCard) {
+export function MostSeenCard({ title, content, likes, views, author, publishedAt }: MostSeenCard) {
   return (
     <Link href="/posts">
       <a className={styles.container}>
@@ -23,11 +30,11 @@ export function MostSeenCard({ title, description }: MostSeenCard) {
 
             <div className={styles.infos}>
               <div className={styles.info}>
-                88 <HandsClapping />
+                {likes} <HandsClapping />
               </div>
 
               <div className={styles.info}>
-                102 <Eye />
+                {views} <Eye />
               </div>
 
               <div className={styles.info}>
@@ -35,18 +42,22 @@ export function MostSeenCard({ title, description }: MostSeenCard) {
               </div>
             </div>
 
-            <p className={styles.shortDescription}>
-              {description}
+            <p>
+              <ReactMarkdown
+                className={styles.shortContent}
+              >
+                {content}
+              </ReactMarkdown>
             </p>
 
             <footer>
               <div className={styles.authorContainer}>
                 <Image src="/man.jpg" width={33} height={33} alt="author" />
 
-                <span>Luiz</span>
+                <span>{author.firstName}</span>
               </div>
 
-              <time>30 de maio, 2022</time>
+              <time>{publishedAt}</time>
             </footer>
           </div>
         </article>

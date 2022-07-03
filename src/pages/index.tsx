@@ -1,43 +1,91 @@
 /* eslint-disable @next/next/no-img-element */
+import { parseISO } from "date-fns";
+import { GetServerSideProps } from "next";
 import Image from "next/image";
+import { FormEvent, useState } from "react";
+import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { MostSeenPostsSlider } from "../components/MostSeenPosts";
 import { NewsletterBanner } from "../components/NewsletterBanner";
 import { PostCard } from "../components/PostCard";
+import { api } from "../services/api";
 import styles from "../styles/Home.module.scss";
+import { formAtDate } from "../utils/formatDate";
+import { validateEmail } from "../utils/validateInputs";
 
-const posts = [
-  {
-    id: "sdjksdjksduwe873834",
-    title: "Iniciando no react js",
-    description: "De 01 a 07 de junho de 2020 tivemos a primeira Next Level Week. #NLW 🚀 é uma experiência online com muito conteúdo prático.é uma experiência online com muito conteúdo prático."
-  },
-  {
-    id: "skdcno23761ncjdkfjdkfv",
-    title: "Context Api: O que é?",
-    description: "De 01 a 07 de junho de 2020 tivemos a primeira Next Level Week. #NLW 🚀 é uma experiência online com muito conteúdo prático.é uma experiência online com muito conteúdo prático."
-  },
-  {
-    id: "sdkjnscjs2s039304d-9",
-    title: "Mapas com react js e leaflet",
-    description: "De 01 a 07 de junho de 2020 tivemos a primeira Next Level Week. #NLW 🚀 é uma experiência online com muito conteúdo prático.é uma experiência online com muito conteúdo prático."
-  },
-  {
-    id: "2982938hckjkdfcdkjnjdf",
-    title: "Introdução ao redux toolkit",
-    description: "De 01 a 07 de junho de 2020 tivemos a primeira Next Level Week. #NLW 🚀 é uma experiência online com muito conteúdo prático.é uma experiência online com muito conteúdo prático."
-  }
-]
+type Post = {
+  id: string;
+  title: string;
+  content: string;
+  bannerUrl: string;
+  slug: string;
+  author: {
+    firstName: string;
+    avatarUrl: string;
+  };
+  category: {
+    name: string;
+  };
+  _count: {
+    views: number;
+    likes: number;
+  };
+  createdAt: string;
+}
 
-export default function Home() {
+interface PostsResponse extends Post {
+  isDraft: boolean;
+}
+
+interface HomeProps {
+  lastPosts: Post[];
+  mostSeenPosts: Post[];
+}
+
+export default function Home({ lastPosts, mostSeenPosts }: HomeProps) {  
+
+  const [email, setEmail] = useState('');
+  const [isEmailErr, setIsEmailErr] = useState(false);
+
+  async function handleSubscribe(e: FormEvent) {
+    e.preventDefault();
+
+    if (email === '') {
+      setIsEmailErr(true);
+
+      toast.error("O campo email é obrigatório", {
+        position: 'top-left'
+      });
+    } else if (!validateEmail.test(email)) {
+      setIsEmailErr(true);
+
+      toast.error("Por favor, insira um email válido", {
+        position: 'top-left'
+      });
+    } else {
+      setIsEmailErr(false);
+
+      setEmail('');
+
+      toast.success("Inscrito com sucesso", {
+        position: 'top-left'
+      });
+    }
+  };
+
   return (
-    <main className={styles.main}>
+    <motion.main 
+      className={styles.main}
+      exit={{ opacity: 0 }}
+    >
       <section className={styles.hero}>
         <div className={styles.heroText}>
           <h1>
             Domine uma <span>stack</span> podersa 
-            através de tutoriais <span>profissionais</span> e gratuitos.
+            através de tutoriais <span>profissionais</span> e gratuitos<span>.</span>
           </h1>
 
           <p>
@@ -47,9 +95,16 @@ export default function Home() {
             newsletter.
           </p>
 
-          <form>
+          <form onSubmit={handleSubscribe}>
             <div className={styles.inputGroup}>
-              <Input type="email" placeholder="Seu e-mail.." />
+              <Input 
+                type="text" 
+                placeholder="Seu e-mail.."
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                isInputError={isEmailErr}
+                onFocus={() => setIsEmailErr(false)}
+              />
             </div>
             <Button title="Inscrever-se" bgColor="green" />
           </form>
@@ -58,29 +113,76 @@ export default function Home() {
         <Image width={497} height={427} src="/heroImage.svg" alt="imagem de um jovem usando um computador" />
       </section>
 
-      <section className={styles.mostSeen}>
-        <h2>Mais <span>Vistos</span></h2>
+      {mostSeenPosts.length >= 1 && (
+        <section className={styles.mostSeen}>
+          <h2>Mais <span>Vistos</span></h2>
 
-        <div className={styles.wrapper}>
-          <MostSeenPostsSlider posts={posts} />
-        </div>
-      </section>
+          <div className={styles.wrapper}>
+            <MostSeenPostsSlider posts={mostSeenPosts} />
+          </div>
+        </section>
+      )}
 
       <section className={styles.last}>
         <h2>Últimos <span>Tutoriais</span></h2>
 
         <div className={styles.wrapper}>
-          <PostCard />
-          <PostCard />
-          <PostCard />
-          <PostCard />
-          <PostCard />
+          {lastPosts.map(post => (
+            <PostCard 
+              key={post.id} 
+              title={post.title}
+              content={post.content}
+              category={post.category.name}
+              bannerUrl={post.bannerUrl}
+              slug={post.slug}
+              author={post.author}
+              createdAt={post.createdAt}
+            />
+          ))}
         </div>
       </section>
 
       <section className={styles.newsletter}>
         <NewsletterBanner />
       </section>
-    </main>
+    </motion.main>
   );
+}
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+
+  const response = await api.get<PostsResponse[]>('/posts');   
+
+  const lastPosts = response.data
+    .filter(post => post.isDraft === false)
+    .slice(0, 6)
+    .map(post => {
+      return {
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        bannerUrl: post.bannerUrl,
+        slug: post.slug,
+        author: {
+          firstName: post.author.firstName,
+          avatarUrl: post.author.avatarUrl
+        },
+        category: {
+          name: post.category.name
+        },
+        createdAt: formAtDate(parseISO(post.createdAt))
+      }
+    });  
+  
+  const mostSeenPosts = response
+    .data
+    .filter(post => post._count.views >= 100)
+    .slice(0, 10)
+
+  return {
+    props: {
+      lastPosts,
+      mostSeenPosts
+    }
+  }
 }

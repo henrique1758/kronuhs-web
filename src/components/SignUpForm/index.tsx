@@ -1,7 +1,10 @@
 import { XCircle } from 'phosphor-react';
 import { FormEvent, useState } from 'react';
+import toast from 'react-hot-toast';
 import Modal from 'react-modal'
+
 import { useAuth, useSignInFormModal, useSignUpFormModal } from '../../hooks';
+import { validateEmail, validatePassword } from '../../utils/validateInputs';
 import { Button } from '../Button';
 import { GithubButton } from '../GithubButton';
 import { Input } from "../Input";
@@ -17,6 +20,10 @@ export function SignUpForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const [isNameErr, setIsNameErr] = useState(false);
+    const [isEmailErr, setIsEmailErr] = useState(false);
+    const [isPasswordErr, setIsPasswordErr] = useState(false);
+
     function showSignInFormModal() {
         onCloseSignUpFormModal();
         openSignInFormModal();
@@ -25,17 +32,40 @@ export function SignUpForm() {
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
 
-        await createAccount({
-            name,
-            email,
-            password
-        });
+        if (name === '') {
+            setIsNameErr(true)
 
-        setName("");
-        setEmail("");
-        setPassword("");
+            toast.error("O campo nome é obrigatório", {
+                position: 'top-left'
+            });
+        } else if (!validateEmail.test(email)) {
+            setIsEmailErr(true)
 
-        showSignInFormModal();
+            toast.error("Por favor, insira um email válido", {
+                position: 'top-left'
+            });
+        } else if(!validatePassword.test(password)) {
+            setIsPasswordErr(true)
+
+            toast.error("Por favor, insira uma senha mais segura", {
+                position: 'top-left'
+            });
+        } else {
+            await createAccount({
+                name,
+                email,
+                password
+            });
+
+            setIsEmailErr(false);
+            setIsPasswordErr(false);
+            
+            setName("");
+            setEmail("");
+            setPassword("");
+    
+            showSignInFormModal();
+        }
     }
 
     return (
@@ -62,6 +92,8 @@ export function SignUpForm() {
                         type="text" 
                         placeholder="Seu nome" 
                         value={name}
+                        isInputError={isNameErr}
+                        onFocus={() => setIsNameErr(false)}
                         onChange={e => setName(e.target.value)}
                     />
                 </div>
@@ -69,10 +101,12 @@ export function SignUpForm() {
                 <div className={styles.inputGroup}>
                     <label htmlFor="name">E-mail</label>
                     <Input 
-                        type="email" 
+                        type="text" 
                         placeholder="Seu email"
                         value={email}
-                        onChange={e => setEmail(e.target.value)} 
+                        isInputError={isEmailErr}
+                        onFocus={() => setIsEmailErr(false)}
+                        onChange={e => setEmail(e.target.value)}
                     />
                 </div>
 
@@ -82,8 +116,10 @@ export function SignUpForm() {
                         type="password" 
                         placeholder="Sua senha"
                         value={password}
+                        isInputError={isPasswordErr}
+                        onFocus={() => setIsPasswordErr(false)}
                         onChange={e => setPassword(e.target.value)}
-                    />
+                    />          
                 </div>
 
                 <Button type="submit" bgColor="green" title="Inscrever-se" />

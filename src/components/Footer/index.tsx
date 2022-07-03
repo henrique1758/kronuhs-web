@@ -1,5 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { PaperPlaneTilt } from "phosphor-react";
+import { FormEvent, useState } from "react";
+import toast from "react-hot-toast";
+import { validateEmail } from "../../utils/validateInputs";
 import { Input } from "../Input";
 import styles from "./styles.module.scss";
 
@@ -48,17 +51,7 @@ export function Footer() {
                 <div>
                     <h2>Contact</h2>
 
-                    <form>
-                        <h3>henriquemonteiro942@gmail.com</h3>
-
-                        <div className={styles.formGroup}>
-                            <Input type="email" placeholder="Send a message" />
-
-                            <button>
-                                <PaperPlaneTilt />
-                            </button>
-                        </div>
-                    </form>
+                    <h3>henriquemonteiro942@gmail.com</h3>
                 </div>
             </div>
         </footer>

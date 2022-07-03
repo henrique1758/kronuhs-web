@@ -18,3 +18,9 @@
     border: 1px solid var(--green-500);
   }
 }
+
+.inputError {
+  border: 1px solid var(--red-500);
+
+  color: var(--red-500);
+}

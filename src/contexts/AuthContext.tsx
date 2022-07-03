@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import Router from "next/router";
-import { destroyCookie, parseCookies, setCookie } from "nookies";
-import { createContext, ReactNode, useCallback, useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { api } from "../services/apiClient";
+import Router from 'next/router';
+import { destroyCookie, parseCookies, setCookie } from 'nookies';
+import { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { api } from '../services/api';
 
 interface AuthProviderProps {
    children: ReactNode
@@ -56,11 +56,11 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     const isUserLoggedIn = !!user;    
 
     useEffect(() => {
-        const { "@kronuhs:token": token } = parseCookies()
+        const { '@kronuhs:token': token } = parseCookies()
         
         if (token) {
           api
-            .get("blog/users/profile")
+            .get('blog/users/profile')
             .then(response => {
               setUser(response.data)
             })
@@ -72,14 +72,14 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
 
     async function createAccount({ name, email, password }: CreateAccountData): Promise<void> {    
         try {
-            await api.post("/blog/users", {
+            await api.post('/blog/users', {
                 name,
                 email,
                 password
             });
         } catch (err: any) {
             toast.error(err.response.data.message, {
-                position: "top-left"
+                position: 'top-left'
             });
         }
     }
@@ -92,19 +92,19 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
                     refresh_token,
                     userData
                 }
-            } = await api.post<SignInResponse>("/blog/session", {
+            } = await api.post<SignInResponse>('/blog/session', {
               email,
               password
             });
 
-            setCookie(undefined, "@kronuhs:token", token, {
+            setCookie(undefined, '@kronuhs:token', token, {
                 maxAge: 60 * 60 * 24 * 30,
-                path: "/"
+                path: '/'
             });
 
-            setCookie(undefined, "@kronuhs:refresh_token", refresh_token, {
+            setCookie(undefined, '@kronuhs:refresh_token', refresh_token, {
                 maxAge: 60 * 60 * 24 * 30,
-                path: "/"
+                path: '/'
             });
 
             setUser({
@@ -116,11 +116,11 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
 
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-            Router.push("/");
+            Router.push('/');
             
         } catch (err: any) {
             toast.error(err.response.data.message, {
-                position: "top-left"
+                position: 'top-left'
             });
         }
     }, []);
@@ -133,8 +133,8 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
             user,
             signOut,
             signInWithGithub,
-            createAccount ,
-            isUserLoggedIn       
+            createAccount,
+            isUserLoggedIn,
         }}>
             {children}
         </AuthContext.Provider>

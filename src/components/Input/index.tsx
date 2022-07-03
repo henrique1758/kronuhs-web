@@ -1,11 +1,18 @@
 import { InputHTMLAttributes } from "react";
 
-type InputProps = InputHTMLAttributes<HTMLInputElement>;
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  isInputError?: boolean;
+}
 
 import styles from "./styles.module.scss";
 
-export function Input({ ...props }: InputProps) {
+export function Input({ isInputError, ...props }: InputProps) {
   return(
-    <input {...props} className={styles.input} />
+    <input 
+      {...props} 
+      className={
+        `${styles.input} ${isInputError && styles.inputError}`
+      } 
+    />
   );
 }

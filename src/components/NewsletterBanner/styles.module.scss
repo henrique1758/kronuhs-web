@@ -23,7 +23,7 @@
     
     input {
       height: 2.5rem;
-      border: transparent;
+      border: none;
       border-radius: 0.375rem;
       padding: 1rem;
       
@@ -35,6 +35,12 @@
 
       &::placeholder {
         font-size: 0.875rem;
+      }
+
+      &.inputError {
+        border: 1px solid var(--red-500);
+      
+        color: var(--red-500);
       }
     }
 

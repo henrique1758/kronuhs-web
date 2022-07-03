@@ -1,13 +1,13 @@
 interface BadgeProps {
-  title: string;
+  name: string;
 }
 
 import styles from "./styles.module.scss";
 
-export function Badge({ title }: BadgeProps) {
+export function Badge({ name }: BadgeProps) {
   return (
     <div className={styles.badge}>
-      {title}
+      {name}
     </div>
   );
 }
