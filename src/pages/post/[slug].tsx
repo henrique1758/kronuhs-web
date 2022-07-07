@@ -1,23 +1,148 @@
 /* eslint-disable @next/next/no-img-element */
+import { GetServerSideProps } from "next";
+import Link from "next/link";
 import { FacebookLogo, GithubLogo, HandsClapping, LinkedinLogo, TwitterLogo } from "phosphor-react";
-import { NewsletterBanner } from "../../components/NewsletterBanner";
-import { Comment } from "../../components/Comment";
-import styles from "../../styles/Post.module.scss";
-import { Button } from "../../components/Button";
+import { parseISO } from "date-fns";
+import ReactMarkdown from "react-markdown";
 
-export default function Post() {
+import { NewsletterBanner } from "../../components/NewsletterBanner";
+import { Button } from "../../components/Button";
+import { Comment } from "../../components/Comment";
+
+import { api } from "../../services/api";
+import { formAtDate } from "../../utils/formatDate";
+
+import styles from "../../styles/Post.module.scss";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useAuth, useSignInFormModal } from "../../hooks";
+import toast from "react-hot-toast";
+import { useRouter } from "next/router";
+
+type Like = {
+    userId: string;
+    postId: string;
+}
+
+type CommentData = {
+    id: string;
+    content: string;
+    author: {
+        name: string;
+        avatarUrl: string;
+    };
+    createdAt: string;
+}
+
+type Post = {
+    id: string;
+    title: string;
+    subtitle: string;
+    content: string;
+    bannerUrl: string;
+    author: {
+      firstName: string;
+      avatarUrl: string;
+    };
+    likes: Like[]
+    comments: CommentData[];
+    createdAt: string;
+}
+
+interface PostProps {
+    post: Post;
+}
+
+export default function Post({ post }: PostProps) {
+    const { user, isUserLoggedIn } = useAuth();
+    const { openSignInFormModal } = useSignInFormModal();
+    const router = useRouter();
+
+    const [userLiked, setUserLiked] = useState(false);
+    const [isContentEmpty, setIsContentEmpty] = useState(false);
+    const [commentContent, setCommentContent] = useState('');
+
+    const isUserAlreadyLiked = post.likes?.some(like => like.userId === user?.id);
+
+    useEffect(() => {
+        if (isUserAlreadyLiked) {
+            setUserLiked(true);
+        } else {
+            setUserLiked(false);
+        }
+    }, [isUserAlreadyLiked]);
+
+    useEffect(() => {
+        async function createView() {
+            await api.post(`/blog/views/${post.id}`, {
+                userId: user?.id
+            });
+        }
+
+        createView()
+    }, [isUserLoggedIn, post.id, user?.id]);
+
+
+    const numberOfWords = post.content.split(' ').length;
+
+    const readTimeCalcResult = Math.ceil(numberOfWords/ 200);
+
+    const readTimeInMinutes = readTimeCalcResult;
+
+    const handleLike = useCallback(async () => {
+        if (!isUserLoggedIn) {
+            openSignInFormModal();
+        } else if (!userLiked) {
+            setUserLiked(true);
+
+            await api.post(`/blog/likes/${post.id}`);
+        } else {
+            setUserLiked(false);
+
+            await api.delete(`/blog/likes/${post.id}`);
+        }
+    }, [isUserLoggedIn, openSignInFormModal, post.id, userLiked]);
+
+    async function handleCreateComment(e: FormEvent) {
+        e.preventDefault();
+        
+        if (commentContent === '') {
+            setIsContentEmpty(true);
+            
+            toast.error("O campo comentário é obrigatório", {
+                position: 'top-left'
+            });
+        } else {
+            await api.post(`/blog/comments/${post.id}`, {
+                content: commentContent,
+                userId: user.id,
+                postId: post.id
+            });
+        }
+
+        setCommentContent('');
+        router.reload();
+    }
+
     return (
         <>
-            <img src="/banner.png" alt="banner" className={styles.banner} />
+            <img 
+                src={post.bannerUrl}
+                alt="banner"
+                className={styles.banner}
+            />
+            
+            <div className={styles.heading}>
+                <h1 className={styles.title}>{post.title}</h1>
 
-            <h1 className={styles.title}>Primeira Next Level Week #NLW</h1>
-
-            <div className={styles.infos}>
-                <span className={styles.readTime}>7 min</span>
-                <span>12 de jan, 2022</span>
+                <h3 className={styles.subtitle}>{post.subtitle}</h3>
             </div>
 
-            <div className={styles.content}>
+            <div className={styles.infos}>
+                <span className={styles.readTime}>{readTimeInMinutes} min</span>
+                <time>{post.createdAt}</time>
+            </div>
+
+            <div className={styles.contentWrapper}>
                 <aside>
                     <button>
                         <TwitterLogo className={styles.twitter} />
@@ -31,29 +156,21 @@ export default function Post() {
                         <FacebookLogo className={styles.facebook} />
                     </button>
 
-                    <button>
-                        <HandsClapping className={styles.clap} />
+                    <button 
+                        type="button" 
+                        onClick={handleLike} 
+                    >
+                        <HandsClapping 
+                            className={`${styles.clap} ${userLiked ? styles.clapActive : ''}`}
+                            weight={userLiked ? 'fill': 'regular'}
+                        />
                     </button>
                 </aside>
 
                 <article>
-                    De 01 a 07 de junho de 2020 tivemos a primeira Next Level Week.
-                    #NLW 🚀 é uma experiência online com muito conteúdo prático, desafios e hacks que ajuda o dev (Dev é a abreviação de developer, uma palavra que não tem gênero. Ou seja, dev pode ser tanto um programador quanto uma programadora 👨‍🚀👩‍🚀),  a avançar para o próximo nível.
-                    A jornada do dev é feita de etapas e de aprendizado contínuo. Dessas etapas exige habilidades e conhecimentos específicos, por isso a melhor forma de acelerar sua evolução é entender exatamente qual é o seu momento, seu contexto e seus objetivos.
-                    Na primeira Next Level Week, foram mais de 8 horas de conteúdo técnico, além das lives com os parceiros e comunidade. Mais do que fazer um app bonitão, com código muito top, bem organizado e fullstack (javascript, typescript, node, react, react native, css, html, npm, github, axios, express, celebrate, joi, knex, sqlite3, figma… uffaaa), tivemos algumas lições não-técnicas valiosas para a carreira.
-                    Além de conhecer as ferramentas de desenvolvimento precisamos dominá-las, e além disso, precisamos acompanhar as atualizações/evoluções. É muito difícil, para não falar impossível dominar todas as tecnologias e ainda acompanhar suas evoluções, devido ao nosso tempo limitado e que dedicamos também às outras áreas de nossas vidas.
-                    Então precisamos de FOCO, escolher uma stack e ficar bom nela e evoluir junto com ela.
-                    Opa, mas qual stack? Eita, Depende! 😅
-                    Responda pra si, que momento você está vivendo, qual seu contexto, qual seu objetivo?
-                    O Diego Fernandes falou em um dos vídeos algo que nos ajuda a responder as perguntas acima:
-                    Então em vez de pensar qual tecnologia é melhor, pense qual tecnologia melhor é para você para o seu momento para o seu contexto e para os seus objetivos e para isso agora você precisa fazer algumas perguntas como por exemplo: Que tipo de profissional o mercado está buscando? Quais empresas estão utilizando essa tecnologia? Como que é o ecossistema e as ferramentas ao redor da tecnologia? Qual o tamanho da comunidade que está por trás dessa tecnologia? Essa tecnologia faz sentido para o seu momento de carreira? Quantas oportunidades existem para essa tecnologia? 
-                    Quanto que eu posso reaproveitar de conhecimento anterior usando essa tecnologia? Quais são os problemas que essa tecnologia resolve e principalmente aonde eu quero chegar com essa tecnologia?
-                    Sim, é um exercício de reflexão e não de codificação. Se seu objetivo é ser desenvolvedor web, iniciante ou quer migrar de carreira, tecnologia, Javascript é uma ótima opção. Todas as tecnologias têm vantagens e desvantagens, resolvem algum problema específico, tem mercado e salários em diversos níveis.
-                    Não pense apenas em nível de cidade, estado ou país. Pense de forma global, em qualquer lugar do mundo vai ter alguém precisando de uma sistema web, mobile, ou desktop e ai que você entra.
-                    Exemplo, você pode trabalhar apenas com desenvolvimento nativo,  Android ou iOS, ou ir para híbridos e atuar com as duas plataformas (Sistemas Operacionais):
-                    Temos então o Ionic, Cordova, Xamarin, Flutter e React Native, talvez poderia colocar aqui o PWA também. Todas essas tecnologias resolvem um problema: entregar software para smartphone, todas tem suas vantagens e desvantagens: complexidade da ferramenta, curva de aprendizado, reuso de código, limitação de plataforma, performance, etc. Coisas que elas têm em comum: Mercado 💰
-                    Com Javascript você pode desenvolver para web, mobile, desktop, você pode se descobrir nesse leque de possibilidades na área de desenvolvimento, ou mesmo ser um Full Stack Developer.
-                    Experiência te dá velocidade, velocidade vem com a prática e tudo isso é uma questão de FOCO, somado com segurança de sempre estar entregando projetos com mais qualidade.
+                    <ReactMarkdown className={styles.content}>
+                        {post.content}
+                    </ReactMarkdown>
                 </article>
             </div>
 
@@ -65,21 +182,25 @@ export default function Post() {
                 <h2>Autor deste post</h2>
 
                 <img 
-                    src="/man.jpg" 
+                    src={post.author.avatarUrl}
                     alt="author" 
                     className={styles.authorImage} 
                 />
 
-                <span>Henrique Monteiro</span>
+                <span>{post.author.firstName}</span>
 
                 <div className={styles.social}>
-                    <a href="#">
-                        <LinkedinLogo weight="fill" className={styles.linkedinLogo} />
-                    </a>
+                    <Link href="http://www.linkedin.com">
+                        <a>
+                            <LinkedinLogo weight="fill" className={styles.linkedinLogo} />
+                        </a>
+                    </Link>
 
-                    <a href="#">
-                        <GithubLogo weight="fill" className={styles.githubLogo} />
-                    </a>
+                    <Link href="http://www.github.com">
+                        <a>
+                            <GithubLogo weight="fill" className={styles.githubLogo} />
+                        </a>
+                    </Link>
                 </div>
             </div>
 
@@ -88,21 +209,76 @@ export default function Post() {
 
                 <span>O que achou do post?</span>
 
-                <form>
-                    <textarea placeholder="Deixe um comentário..." />
+                <form onSubmit={handleCreateComment}>
+                    <textarea 
+                        placeholder="Deixe um comentário..."
+                        onChange={e => setCommentContent(e.target.value)}
+                        value={commentContent}
+                        className={isContentEmpty ? styles.commentContentEmpty : ''}
+                        onFocus={() => setIsContentEmpty(false)}
+                        disabled={!isUserLoggedIn}
+                    />
 
-                    <Button title="Comentar" bgColor="green" type="submit" />
+                    <Button 
+                        title="Comentar" 
+                        bgColor="green" 
+                        type="submit"
+                        disabled={!isUserLoggedIn}
+                    />
                 </form>
 
                 <ul>
-                    <Comment />
-
-                    <Comment />
-
-                    <Comment />
+                    {post.comments?.map(comment => (
+                        <Comment 
+                            key={comment.id}
+                            author={comment.author}
+                            content={comment.content}
+                            createdAt={comment.createdAt}
+                        />
+                    ))}
                 </ul>
             </div>
         </>
     );
 }
 
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+    const { slug } = params;
+
+    const response = await api.get<Post>(`/posts/${slug}`);
+
+    const post = {
+        id: response.data.id,
+        title: response.data.title,
+        subtitle: response.data.subtitle,
+        content: response.data.content,
+        bannerUrl: response.data.bannerUrl,
+        author: {
+            firstName: response.data.author.firstName,
+            avatarUrl: response.data.author.avatarUrl
+        },
+        comments: response.data.comments.map(comment => {
+            return {
+                content: comment.content,
+                author: {
+                    name: comment.author.name,
+                    avatarUrl: comment.author.avatarUrl,
+                },
+                createdAt: comment.createdAt
+            }
+        }),
+        likes: response.data.likes.map(like => {
+            return {
+                userId: like.userId,
+                postId: like.postId
+            }
+        }),
+        createdAt: formAtDate(parseISO(response.data.createdAt))
+    }
+
+    return {
+        props: {
+            post
+        }
+    }
+}

@@ -116,7 +116,7 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
 
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-            Router.push('/');
+            Router.reload();
             
         } catch (err: any) {
             toast.error(err.response.data.message, {

@@ -1,4 +1,3 @@
-import { AnimatePresence } from 'framer-motion';
 import type { AppProps } from 'next/app';
 import { Toaster } from 'react-hot-toast';
 import { Footer } from '../components/Footer';
@@ -9,12 +8,10 @@ import '../styles/globals.scss';
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <Providers>
-      <AnimatePresence exitBeforeEnter>
         <Header />
           <Component {...pageProps} />
           <Toaster />
         <Footer />
-      </AnimatePresence>
     </Providers>
   );
 }

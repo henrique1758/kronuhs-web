@@ -37,10 +37,7 @@ interface PostProps {
 
 export default function Posts({ posts }: PostProps) {
   return (
-    <motion.main 
-      className={styles.container}
-      exit={{ opacity: 0 }}
-    >
+    <main className={styles.container}>
       <header className={styles.heading}>
         <h1>
           <span>Confira</span> os nossos últimos <span>posts</span>
@@ -71,7 +68,7 @@ export default function Posts({ posts }: PostProps) {
       <section className={styles.newsletter}>
         <NewsletterBanner />
       </section>
-    </motion.main>
+    </main>
   );
 }
 

@@ -1,4 +1,7 @@
+import Router from "next/router";
+import { useState } from "react";
 import { useAuth } from "../../hooks";
+import { api } from "../../services/api";
 import styles from "./styles.module.scss";
 
 export function ProfileBox() {
@@ -10,8 +13,14 @@ export function ProfileBox() {
         window.location.reload();
     }
 
-    async function handleUpdateAvatar(avatarFile: string) {
-        console.log(avatarFile);
+    async function handleUpdateAvatar(avatarFile: File) {
+        const formData = new FormData();
+
+        formData.append("avatar", avatarFile);        
+
+        await api.patch("/blog/users/update/avatar", formData);
+
+        Router.reload();
     }
 
     return (
@@ -21,7 +30,7 @@ export function ProfileBox() {
                     type="file" 
                     hidden 
                     id="avatar"
-                    onChange={e => handleUpdateAvatar(e.target.value)}
+                    onChange={e => handleUpdateAvatar(e.target.files[0])}
                 />
 
                 <label 

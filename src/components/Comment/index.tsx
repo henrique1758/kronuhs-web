@@ -1,25 +1,35 @@
+/* eslint-disable @next/next/no-img-element */
+import { formatDistanceToNow, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import styles from "./styles.module.scss";
 
-/* eslint-disable @next/next/no-img-element */
-export function Comment() {
+interface CommentProps {
+    author: {
+        name: string;
+        avatarUrl: string;
+    },
+    content: string;
+    createdAt: string;
+}
+
+export function Comment({ author, content, createdAt }: CommentProps) {
+    const formattedCommentDate = formatDistanceToNow(parseISO(createdAt), {
+        locale: ptBR,
+        addSuffix: true
+    })
+
     return (
         <li className={styles.wrapper}>
-            <img src="/man.jpg" alt="comment" />
+            <img src={author?.avatarUrl} alt="comment" />
 
             <div className={styles.commentData}>
                 <div className={styles.commentInfo}>
-                    <strong>Rafael Gomes</strong>
+                    <strong>{author.name}</strong>
 
-                    <span>há 5 minutos</span>
+                    <span>{formattedCommentDate}</span>
                 </div>
 
-                <p>
-                    Conteúdo informativo e de qualidade. me ajudou muito!!! Obrigada de verdade
-                    Conteúdo informativo e de qualidade. me ajudou muito!!! Obrigada de verdade
-                    Conteúdo informativo e de qualidade. me ajudou muito!!! Obrigada de verdade
-                    Conteúdo informativo e de qualidade. me ajudou muito!!! Obrigada de verdade
-                    Conteúdo informativo e de qualidade. me ajudou muito!!! Obrigada de verdade
-                </p>
+                <p>{content}</p>
             </div>
         </li>
     );

@@ -13,6 +13,7 @@ interface MostSeenCard {
   publishedAt: string;
   author: {
     firstName: string;
+    avatarUrl: string;
   };
 }
 
@@ -52,7 +53,13 @@ export function MostSeenCard({ title, content, likes, views, author, publishedAt
 
             <footer>
               <div className={styles.authorContainer}>
-                <Image src="/man.jpg" width={33} height={33} alt="author" />
+                <Image 
+                  src={author.avatarUrl} 
+                  loader={() => author.avatarUrl} 
+                  width={33} 
+                  height={33} 
+                  alt="author" 
+                />
 
                 <span>{author.firstName}</span>
               </div>

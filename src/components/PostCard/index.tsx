@@ -23,7 +23,7 @@ interface PostCardProps {
 export function PostCard({ title, content, author, category, slug, bannerUrl, createdAt }: PostCardProps) {  
   return (
     <div className={styles.container}>
-      <Link href={`post/${slug}`}>
+      <Link href={`/post/${slug}`}>
         <a>
           <img 
             src={bannerUrl}
@@ -51,6 +51,7 @@ export function PostCard({ title, content, author, category, slug, bannerUrl, cr
                 width={33} 
                 height={33} 
                 alt={author.firstName} 
+                unoptimized
               />
               <span>{author.firstName}</span>
             </div>

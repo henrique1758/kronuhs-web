@@ -1,4 +1,6 @@
 .wrapper {
+    min-width: 720px;
+
     display: flex;
     align-items: flex-start;
     gap: 0.625rem;
@@ -10,6 +12,16 @@
     }
 }
 
+.commentData {
+    display: grid;
+    width: 100%;
+
+
+    p {
+        color: var(--gray-400);
+    }
+}
+
 .commentInfo {
     display: flex;
     align-items: center;
@@ -17,13 +29,5 @@
 
     strong {
         color: var(--black-500);
-    }
-}
-
-.commentData {
-    display: grid;
-
-    p {
-        color: var(--gray-400);
     }
 }

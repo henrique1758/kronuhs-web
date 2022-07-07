@@ -16,7 +16,7 @@ export function NewsletterBanner() {
       toast.error("O campo email é obrigatório", {
         position: 'top-left'
       });
-  } else if (!validateEmail.test(email)) {
+    } else if (!validateEmail.test(email)) {
       setIsEmailErr(true);
 
       toast.error("Por favor, insira um email válido", {
@@ -39,14 +39,14 @@ export function NewsletterBanner() {
 
       <h2>Inscreva-se na nossa newsletter</h2>
 
-      <form onSubmit={handleSubscribe}>
+      <form>
         <input 
           type="text"
           placeholder="Seu e-mail..."
           value={email}
           onChange={e => setEmail(e.target.value)}
           onFocus={() => setIsEmailErr(false)}
-          className={isEmailErr && styles.inputError}
+          className={isEmailErr ? styles.inputError : ''}
         />
 
         <button type="submit">

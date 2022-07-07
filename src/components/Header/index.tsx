@@ -29,7 +29,12 @@ export function Header() {
       <div className={styles.container}>
         <Link href="/">
           <a>
-            <Image src="/logo.svg" alt="logomarca da kronuhs" width={95} height={33} />
+            <Image 
+              src="/logo.svg" 
+              alt="logomarca da kronuhs" 
+              width={95} 
+              height={33} 
+            />
           </a>
         </Link>
 
@@ -58,7 +63,8 @@ export function Header() {
             {user?.avatarUrl ? (
               <div className={styles.profileAvatarWrapper}>
                 <Image 
-                  src="/man.jpg"
+                  src={user.avatarUrl}
+                  loader={() => user.avatarUrl}
                   width={32} 
                   height={32} 
                   objectFit="cover" 

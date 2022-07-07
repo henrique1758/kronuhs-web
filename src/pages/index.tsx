@@ -77,10 +77,7 @@ export default function Home({ lastPosts, mostSeenPosts }: HomeProps) {
   };
 
   return (
-    <motion.main 
-      className={styles.main}
-      exit={{ opacity: 0 }}
-    >
+    <main className={styles.main}>
       <section className={styles.hero}>
         <div className={styles.heroText}>
           <h1>
@@ -110,10 +107,15 @@ export default function Home({ lastPosts, mostSeenPosts }: HomeProps) {
           </form>
         </div>
 
-        <Image width={497} height={427} src="/heroImage.svg" alt="imagem de um jovem usando um computador" />
+        <Image 
+          width={497} 
+          height={427} 
+          src="/heroImage.svg" 
+          alt="imagem de um jovem usando um computador" 
+        />
       </section>
 
-      {mostSeenPosts.length >= 1 && (
+      {mostSeenPosts?.length >= 1 && (
         <section className={styles.mostSeen}>
           <h2>Mais <span>Vistos</span></h2>
 
@@ -145,14 +147,14 @@ export default function Home({ lastPosts, mostSeenPosts }: HomeProps) {
       <section className={styles.newsletter}>
         <NewsletterBanner />
       </section>
-    </motion.main>
+    </main>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
 
-  const response = await api.get<PostsResponse[]>('/posts');   
-
+  const response = await api.get<PostsResponse[]>('/posts');
+  
   const lastPosts = response.data
     .filter(post => post.isDraft === false)
     .slice(0, 6)

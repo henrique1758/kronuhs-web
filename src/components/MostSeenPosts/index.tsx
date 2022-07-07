@@ -12,6 +12,7 @@ interface Post {
     slug: string;
     author: {
         firstName: string;
+        avatarUrl: string;
     };
     category: {
         name: string;
@@ -38,7 +39,7 @@ export function MostSeenPostsSlider({ posts }: MostSeenPostsSliderProps) {
                             content={post.content}
                             likes={post._count.likes}
                             views={post._count.views}
-                            author={post.author.firstName}
+                            author={post.author}
                             publishedAt={post.createdAt}
                         />
                     </SwiperSlide>
