@@ -65,6 +65,7 @@ export function Header() {
                 <Image 
                   src={user.avatarUrl}
                   loader={() => user.avatarUrl}
+                  unoptimized
                   width={32} 
                   height={32} 
                   objectFit="cover" 

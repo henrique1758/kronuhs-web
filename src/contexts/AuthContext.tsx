@@ -34,10 +34,10 @@ interface CreateAccountData {
 }
 
 interface AuthContextData {
-    signIn: (data: SignInData) => Promise<void>;
-    signInWithGithub: () => Promise<void>;
-    signOut: () => void;
     createAccount: (data: CreateAccountData) => Promise<void>;
+    githubAuth: (githubCode: string) => Promise<void>;
+    signIn: (data: SignInData) => Promise<void>;
+    signOut: () => void;
     user: User | undefined;
     isUserLoggedIn: boolean;
 }
@@ -78,6 +78,31 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
                 password
             });
         } catch (err: any) {
+            toast.error(err.response.data.message, {
+                position: 'top-left'
+            });
+        }
+    }
+
+    async function githubAuth(githubCode: string) {
+        try {
+            const { 
+                data: { token, userData } 
+            } = await api.post<SignInResponse>("/blog/session/auth-github", {
+                githubCode
+            });
+    
+            setUser(userData);
+    
+            setCookie(undefined, '@kronuhs:token', token, {
+                maxAge: 60 * 60 * 24 * 30,
+                path: '/'
+            });
+
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+            Router.reload();
+        } catch (err) {
             toast.error(err.response.data.message, {
                 position: 'top-left'
             });
@@ -125,14 +150,12 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
         }
     }, []);
 
-    const signInWithGithub = useCallback(async () => {}, []);
-
     return (
         <AuthContext.Provider value={{
             signIn,
             user,
             signOut,
-            signInWithGithub,
+            githubAuth,
             createAccount,
             isUserLoggedIn,
         }}>

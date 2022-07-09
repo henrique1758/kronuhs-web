@@ -4,6 +4,7 @@ import { ptBR } from "date-fns/locale";
 import styles from "./styles.module.scss";
 
 interface CommentProps {
+    key: string;
     author: {
         name: string;
         avatarUrl: string;
@@ -12,7 +13,7 @@ interface CommentProps {
     createdAt: string;
 }
 
-export function Comment({ author, content, createdAt }: CommentProps) {
+export function Comment({ key, author, content, createdAt }: CommentProps) {
     const formattedCommentDate = formatDistanceToNow(parseISO(createdAt), {
         locale: ptBR,
         addSuffix: true

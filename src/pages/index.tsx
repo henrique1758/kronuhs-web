@@ -2,7 +2,7 @@
 import { parseISO } from "date-fns";
 import { GetServerSideProps } from "next";
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 

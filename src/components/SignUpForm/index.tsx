@@ -1,5 +1,5 @@
 import { XCircle } from 'phosphor-react';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Modal from 'react-modal'
 
@@ -14,7 +14,7 @@ export function SignUpForm() {
     const { isSignUpFormModalOpen, onCloseSignUpFormModal, } = useSignUpFormModal();
     const { openSignInFormModal } = useSignInFormModal();
 
-    const { createAccount } = useAuth();
+    const { createAccount, githubAuth } = useAuth();
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -23,6 +23,22 @@ export function SignUpForm() {
     const [isNameErr, setIsNameErr] = useState(false);
     const [isEmailErr, setIsEmailErr] = useState(false);
     const [isPasswordErr, setIsPasswordErr] = useState(false);
+
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=8efb003d95e84bb5ebe6`
+
+    useEffect(() => {
+        const url = window.location.href;
+
+        const hasGithubCode = url.includes("?code=");
+
+        if (hasGithubCode) {
+            const [urlWithoutCode, code] = url.split("?code=");
+
+            githubAuth(code);
+
+            window.history.pushState({}, '', urlWithoutCode);
+        }
+    }, [githubAuth])
 
     function showSignInFormModal() {
         onCloseSignUpFormModal();
@@ -127,7 +143,10 @@ export function SignUpForm() {
 
             <div className={styles.or}>OU</div>
 
-            <GithubButton title="Criar conta com github" />
+            <GithubButton 
+                title="Criar conta com github"
+                href={authUrl}
+            />
 
             <div className={styles.verifyContainer}>
                 Já possui uma conta? 

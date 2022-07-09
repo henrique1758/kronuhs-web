@@ -1,8 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 
-import ReactMarkdown from "react-markdown";
+const Markdown = dynamic(() => import('markdown-to-jsx'), {
+  ssr: false
+})
+
 import { Badge } from "../Badge";
 
 import styles from "./styles.module.scss";
@@ -20,7 +24,7 @@ interface PostCardProps {
   createdAt: string;
 }
 
-export function PostCard({ title, content, author, category, slug, bannerUrl, createdAt }: PostCardProps) {  
+export function PostCard({ title, content, author, category, slug, bannerUrl, createdAt }: PostCardProps) { 
   return (
     <div className={styles.container}>
       <Link href={`/post/${slug}`}>
@@ -36,11 +40,11 @@ export function PostCard({ title, content, author, category, slug, bannerUrl, cr
 
             <Badge name={category} />
 
-            <ReactMarkdown
+            <Markdown
               className={styles.content}
             >
               {content}
-            </ReactMarkdown>
+            </Markdown>
           </div>
 
           <div className={styles.info}>

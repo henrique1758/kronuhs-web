@@ -1,12 +1,18 @@
+import axios from "axios";
+import { AnchorHTMLAttributes, useEffect } from "react";
+import { api } from "../../services/api";
 import styles from "./styles.module.scss";
 
-interface GithubButtonProps {
+interface GithubButtonProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
     title: string;
 }
 
-export function GithubButton({ title }: GithubButtonProps) {
+export function GithubButton({ title, ...rest }: GithubButtonProps) {
     return (
-        <button className={styles.container}>
+        <a
+            className={styles.container}
+            {...rest}
+        >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="25"
@@ -27,6 +33,6 @@ export function GithubButton({ title }: GithubButtonProps) {
             </svg>
 
             {title}
-        </button>
+        </a>
     );
 }

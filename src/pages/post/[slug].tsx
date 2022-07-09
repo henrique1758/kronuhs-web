@@ -3,7 +3,6 @@ import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { FacebookLogo, GithubLogo, HandsClapping, LinkedinLogo, TwitterLogo } from "phosphor-react";
 import { parseISO } from "date-fns";
-import ReactMarkdown from "react-markdown";
 
 import { NewsletterBanner } from "../../components/NewsletterBanner";
 import { Button } from "../../components/Button";
@@ -17,6 +16,8 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useAuth, useSignInFormModal } from "../../hooks";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import Markdown from "markdown-to-jsx";
+import axios from "axios";
 
 type Like = {
     userId: string;
@@ -52,6 +53,10 @@ interface PostProps {
     post: Post;
 }
 
+type IPResponse = {
+    IPv4: string;
+}
+
 export default function Post({ post }: PostProps) {
     const { user, isUserLoggedIn } = useAuth();
     const { openSignInFormModal } = useSignInFormModal();
@@ -60,6 +65,8 @@ export default function Post({ post }: PostProps) {
     const [userLiked, setUserLiked] = useState(false);
     const [isContentEmpty, setIsContentEmpty] = useState(false);
     const [commentContent, setCommentContent] = useState('');
+
+    const [ipAdress, setIpAdress] = useState('');
 
     const isUserAlreadyLiked = post.likes?.some(like => like.userId === user?.id);
 
@@ -71,16 +78,38 @@ export default function Post({ post }: PostProps) {
         }
     }, [isUserAlreadyLiked]);
 
+    async function getIpClient() {
+        try {
+            const response = await axios.get<IPResponse>('https://geolocation-db.com/json/d802faa0-10bd-11ec-b2fe-47a0872c6708')
+            
+            setIpAdress(response.data.IPv4);
+        } catch (error) {
+          console.error(error);
+        }
+    }
+
+    useEffect(() => {
+        getIpClient();
+    }, []);
+
     useEffect(() => {
         async function createView() {
-            await api.post(`/blog/views/${post.id}`, {
-                userId: user?.id
-            });
+            if (ipAdress) {
+                if (user) {
+                    await api.post(`/blog/views/${post.id}`, {
+                        userId: user.id,
+                        ipAdress
+                    })
+                } else {
+                    await api.post(`/blog/views/${post.id}`, {
+                        ipAdress
+                    })
+                }
+            }
         }
 
-        createView()
-    }, [isUserLoggedIn, post.id, user?.id]);
-
+        createView();
+    }, [ipAdress, post.id, user, user?.id]);
 
     const numberOfWords = post.content.split(' ').length;
 
@@ -168,9 +197,9 @@ export default function Post({ post }: PostProps) {
                 </aside>
 
                 <article>
-                    <ReactMarkdown className={styles.content}>
+                    <Markdown className={styles.content}>
                         {post.content}
-                    </ReactMarkdown>
+                    </Markdown>
                 </article>
             </div>
 
