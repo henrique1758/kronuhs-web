@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
+import { api } from "../../services/api";
 import { validateEmail } from "../../utils/validateInputs";
 import styles from "./styles.module.scss";
 
@@ -25,11 +26,21 @@ export function NewsletterBanner() {
     } else {
       setIsEmailErr(false);
 
-      setEmail('');
-
-      toast.success("Inscrito com sucesso", {
-        position: 'top-left'
-      });
+      try {
+        const response = await api.post("/blog/newsletter", {
+          email
+        })
+        
+        setEmail('');
+  
+        toast.success(response.data.message, {
+          position: 'top-left'
+        });
+      } catch (err) {
+        toast.error(err.response.data.message, {
+          position: 'top-left'
+        });
+      }
     }
   };
   
@@ -39,7 +50,7 @@ export function NewsletterBanner() {
 
       <h2>Inscreva-se na nossa newsletter</h2>
 
-      <form>
+      <form onSubmit={handleSubscribe}>
         <input 
           type="text"
           placeholder="Seu e-mail..."

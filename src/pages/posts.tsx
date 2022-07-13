@@ -1,7 +1,8 @@
 import { parseISO } from "date-fns";
-import { motion } from "framer-motion";
 import { GetServerSideProps } from "next";
+import { useEffect, useState } from "react";
 import { NewsletterBanner } from "../components/NewsletterBanner";
+import { Pagination } from "../components/Pagination";
 import { PostCard } from "../components/PostCard";
 import { api } from "../services/api";
 import styles from "../styles/Posts.module.scss";
@@ -33,9 +34,23 @@ interface PostsResponse extends Post {
 
 interface PostProps {
   posts: Post[];
+  totalPosts: string;
 }
 
-export default function Posts({ posts }: PostProps) {
+export default function Posts({ posts, totalPosts }: PostProps) {
+  const [pages, setPages] = useState<number[]>([]);
+
+  useEffect(() => {
+    const totalPages = Math.ceil(Number(totalPosts) / 6);
+    const arrayPages = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      arrayPages.push(i);
+
+      setPages(arrayPages);
+    }
+  }, [totalPosts]);
+
   return (
     <main className={styles.container}>
       <header className={styles.heading}>
@@ -65,6 +80,8 @@ export default function Posts({ posts }: PostProps) {
         ))}
       </section>
 
+      <Pagination pages={pages} path="/posts" />
+
       <section className={styles.newsletter}>
         <NewsletterBanner />
       </section>
@@ -72,9 +89,13 @@ export default function Posts({ posts }: PostProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 
-  const response = await api.get<PostsResponse[]>('/posts');
+  const { page } = query;
+
+  const response = await api.get<PostsResponse[]>(`/posts?page=${page}`);  
+
+  const totalPosts = response.headers['x-total-count'];
 
   const posts = response.data
     .filter(post => post.isDraft === false)
@@ -100,6 +121,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   return {
     props: {
       posts,
+      totalPosts
     }
   }
 }

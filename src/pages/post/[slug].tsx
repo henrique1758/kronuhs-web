@@ -1,7 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
+ /* eslint-disable @next/next/no-img-element */
 import { GetServerSideProps } from "next";
 import Link from "next/link";
-import { FacebookLogo, GithubLogo, HandsClapping, LinkedinLogo, TwitterLogo } from "phosphor-react";
+import { GithubLogo, HandsClapping, LinkedinLogo } from "phosphor-react";
 import { parseISO } from "date-fns";
 
 import { NewsletterBanner } from "../../components/NewsletterBanner";
@@ -124,12 +124,16 @@ export default function Post({ post }: PostProps) {
             setUserLiked(true);
 
             await api.post(`/blog/likes/${post.id}`);
+
+            router.reload();
         } else {
             setUserLiked(false);
 
             await api.delete(`/blog/likes/${post.id}`);
+
+            router.reload();
         }
-    }, [isUserLoggedIn, openSignInFormModal, post.id, userLiked]);
+    }, [isUserLoggedIn, openSignInFormModal, post.id, router, userLiked]);
 
     async function handleCreateComment(e: FormEvent) {
         e.preventDefault();
@@ -153,7 +157,7 @@ export default function Post({ post }: PostProps) {
     }
 
     return (
-        <>
+        <main>
             <img 
                 src={post.bannerUrl}
                 alt="banner"
@@ -173,18 +177,6 @@ export default function Post({ post }: PostProps) {
 
             <div className={styles.contentWrapper}>
                 <aside>
-                    <button>
-                        <TwitterLogo className={styles.twitter} />
-                    </button>
-
-                    <button>
-                        <LinkedinLogo className={styles.linkedin} />
-                    </button>
-
-                    <button>
-                        <FacebookLogo className={styles.facebook} />
-                    </button>
-
                     <button 
                         type="button" 
                         onClick={handleLike} 
@@ -194,6 +186,8 @@ export default function Post({ post }: PostProps) {
                             weight={userLiked ? 'fill': 'regular'}
                         />
                     </button>
+
+                    <span>{post.likes.length}</span>
                 </aside>
 
                 <article>
@@ -267,7 +261,7 @@ export default function Post({ post }: PostProps) {
                     ))}
                 </ul>
             </div>
-        </>
+        </main>
     );
 }
 
@@ -275,7 +269,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const { slug } = params;
 
     const response = await api.get<Post>(`/posts/${slug}`);
-
+    
     const post = {
         id: response.data.id,
         title: response.data.title,

@@ -2,9 +2,8 @@
 import { parseISO } from "date-fns";
 import { GetServerSideProps } from "next";
 import Image from "next/image";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
-import { motion } from "framer-motion";
 
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
@@ -68,11 +67,21 @@ export default function Home({ lastPosts, mostSeenPosts }: HomeProps) {
     } else {
       setIsEmailErr(false);
 
-      setEmail('');
-
-      toast.success("Inscrito com sucesso", {
-        position: 'top-left'
-      });
+      try {
+        const response = await api.post("/blog/newsletter", {
+          email
+        })
+  
+        setEmail('');
+  
+        toast.success(response.data.message, {
+          position: 'top-left'
+        });
+      } catch (err) {
+        toast.error(err.response.data.message, {
+          position: 'top-left'
+        });
+      }
     }
   };
 

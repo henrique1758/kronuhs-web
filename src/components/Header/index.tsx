@@ -41,19 +41,31 @@ export function Header() {
         <nav>
           <ul>
             <li>
-              <NavLink path="/" title="Home" />
+              <NavLink path="/" title="Home" href="/" />
             </li>
 
             <li>
-              <NavLink path="/posts" title="Posts" />
+              <NavLink 
+                path="/posts" 
+                title="Posts" 
+                href={{ pathname: "/posts", query: { page: '1' } }} 
+              />
             </li>
 
             <li>
-              <NavLink path="/frontend" title="Front-end" />
+              <NavLink 
+                path="/frontend" 
+                title="Front-end" 
+                href={{ pathname: "/frontend", query: { page: '1' } }} 
+              />
             </li>
 
             <li>
-              <NavLink path="/backend" title="Back-end" />
+              <NavLink 
+                path="/backend" 
+                title="Back-end" 
+                href={{ pathname: "/backend", query: { page: '1' } }} 
+              />
             </li>
           </ul>
         </nav>

@@ -68,18 +68,6 @@
                 transition: color .2s;
             }
 
-            svg.twitter:hover {
-                color: var(--twitter-color);
-            }
-
-            svg.linkedin:hover {
-                color: var(--linkedin-color);
-            }
-
-            svg.facebook:hover {
-                color: var(--facebook-color);
-            }
-
             svg.clap:hover {
                 color: var(--green-500);
             }
@@ -87,6 +75,11 @@
             svg.clapActive {
                fill: var(--green-500);
             }
+        }
+
+        span {
+            text-align: center;
+            color: var(--gray-300);
         }
     }
 

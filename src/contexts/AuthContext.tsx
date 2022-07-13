@@ -19,6 +19,7 @@ interface User {
     name: string;
     email: string;
     avatarUrl?: string;
+    githubId?: string;
 }
 
 interface SignInResponse {
